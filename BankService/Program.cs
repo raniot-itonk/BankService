@@ -43,9 +43,10 @@ namespace BankService
             Log.Logger = new LoggerConfiguration()
                 .Enrich.WithProperty("Environment", env)
                 .ReadFrom.Configuration(configuration)
+                .WriteTo.Console()
                 .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://192.168.250.135:30330/"))
                 {
-                    FailureCallback = e => Console.WriteLine("Unable to submit event " + e.MessageTemplate),
+                    FailureCallback = e => Log.Information("Unable to submit event " + e.MessageTemplate),
                     EmitEventFailure = EmitEventFailureHandling.WriteToSelfLog |
                                        EmitEventFailureHandling.WriteToFailureSink |
                                        EmitEventFailureHandling.RaiseCallback,
