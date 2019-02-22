@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BankService.DB;
+using Microsoft.Extensions.Logging;
 
 namespace BankService.Controllers
 {
@@ -12,16 +13,19 @@ namespace BankService.Controllers
     public class AccountsController : ControllerBase
     {
         private readonly BankingContext _context;
+        private ILogger<AccountsController> _logger;
 
-        public AccountsController(BankingContext context)
+        public AccountsController(BankingContext context, ILogger<AccountsController> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
         // GET: api/Accounts
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
+            _logger.LogInformation("Getting accounts!");
             return await _context.Accounts.ToListAsync();
         }
 

@@ -28,7 +28,13 @@ namespace BankService
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
 
+            SetupLogging(services);
             SetupDatabase(services);
+        }
+
+        private void SetupLogging(IServiceCollection services)
+        {
+
         }
 
         private void SetupDatabase(IServiceCollection services)
