@@ -50,7 +50,8 @@ namespace BankService
                     EmitEventFailure = EmitEventFailureHandling.WriteToSelfLog |
                                        EmitEventFailureHandling.WriteToFailureSink |
                                        EmitEventFailureHandling.RaiseCallback,
-                    FailureSink = new FileSink("/tmp/failures.txt", new JsonFormatter(), null)
+                    FailureSink = new LoggerConfiguration().WriteTo
+                        .File(new JsonFormatter(), "/tmp/fails-{Date}.txt").CreateLogger()
                 })
 
                 .CreateLogger();
