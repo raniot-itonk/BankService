@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BankService.DB;
+using BankService.Models;
 using Microsoft.Extensions.Logging;
 
 namespace BankService.Controllers
@@ -13,7 +15,7 @@ namespace BankService.Controllers
     public class AccountController : ControllerBase
     {
         private readonly BankingContext _context;
-        private ILogger<AccountController> _logger;
+        private readonly ILogger<AccountController> _logger;
 
         public AccountController(BankingContext context, ILogger<AccountController> logger)
         {
@@ -21,88 +23,65 @@ namespace BankService.Controllers
             _logger = logger;
         }
 
-        // GET: api/Accounts
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
-        {
-            _logger.LogInformation("Getting accounts!");
-            return await _context.Accounts.ToListAsync();
-        }
-
-        // GET: api/Accounts/5
+        // Get Account information
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(string id)
         {
-            _logger.LogInformation("Get single account!");
+            
             var account = await _context.Accounts.FindAsync(id);
 
             if (account == null)
             {
                 return NotFound();
             }
-
+            _logger.LogInformation("Got {Account}", account);
             return account;
         }
 
-        // PUT: api/Accounts/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutAccount(string id, Account account)
+        // Deposit money
+        [HttpPatch("{id}/deposit/{amount}")]
+        public async Task<IActionResult> PutAccount(string id, double amount)
         {
-            if (id != account.OwnerId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(account).State = EntityState.Modified;
-
             try
             {
+                var account = await _context.Accounts.FirstOrDefaultAsync(x => x.OwnerId == id);
+                account.Balance += amount;
+
+                _context.Entry(account).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
+                _logger.LogInformation("Successfully deposited {Amount} to {Account}", amount, account);
             }
-            catch (DbUpdateConcurrencyException)
+            catch (Exception e)
             {
-                if (!AccountExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                _logger.LogError(e, "Failed to deposit money");
+                throw;
             }
 
             return NoContent();
         }
 
-        // POST: api/Accounts
+        // Add new accounts
         [HttpPost]
-        public async Task<ActionResult<Account>> PostAccount(Account account)
+        public async Task<ActionResult<Account>> PostAccount(AccountObject accountObject)
         {
-            _context.Accounts.Add(account);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetAccount", new { id = account.OwnerId }, account);
-        }
-
-        // DELETE: api/Accounts/5
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<Account>> DeleteAccount(string id)
-        {
-            var account = await _context.Accounts.FindAsync(id);
-            if (account == null)
+            try
             {
-                return NotFound();
+                var account = new Account
+                {
+                    Balance = accountObject.Balance,
+                    OwnerId = accountObject.OwnerId,
+                    OwnerName = accountObject.OwnerName
+                };
+                _context.Accounts.Add(account);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Successfully created {Account}", account);
+                return CreatedAtAction("GetAccount", new { id = account.OwnerId }, account);
             }
-
-            _context.Accounts.Remove(account);
-            await _context.SaveChangesAsync();
-
-            return account;
-        }
-
-        private bool AccountExists(string id)
-        {
-            return _context.Accounts.Any(e => e.OwnerId == id);
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to create account");
+                throw;
+            }
         }
     }
 }

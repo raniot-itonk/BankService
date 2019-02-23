@@ -18,5 +18,4 @@
   <ItemGroup>
     <ProjectReference Include="..\BankService\BankService.csproj" />
   </ItemGroup>
-
 </Project>
