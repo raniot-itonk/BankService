@@ -51,7 +51,7 @@ namespace BankService
                                        EmitEventFailureHandling.WriteToFailureSink |
                                        EmitEventFailureHandling.RaiseCallback,
                     FailureSink = new LoggerConfiguration().WriteTo
-                        .File(new JsonFormatter(), "/tmp/fails-{Date}.txt").CreateLogger()
+                        .File(new JsonFormatter(), "./fails.txt").CreateLogger()
                 })
 
                 .CreateLogger();
