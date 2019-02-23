@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BankService.DB;
 using BankService.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 
 namespace BankService.Controllers
@@ -24,6 +23,7 @@ namespace BankService.Controllers
         }
 
         // Get Account information
+        //[Authorize("BankingService.UserActions")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(string id)
         {
@@ -39,7 +39,8 @@ namespace BankService.Controllers
         }
 
         // Deposit money
-        [HttpPatch("{id}/deposit/{amount}")]
+        //[Authorize("BankingService.UserActions")]
+        [HttpPut("{id}/deposit/{amount}")]
         public async Task<IActionResult> PutAccount(string id, double amount)
         {
             try
