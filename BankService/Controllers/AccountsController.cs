@@ -33,6 +33,7 @@ namespace BankService.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(string id)
         {
+            _logger.LogInformation("Get single account!");
             var account = await _context.Accounts.FindAsync(id);
 
             if (account == null)
