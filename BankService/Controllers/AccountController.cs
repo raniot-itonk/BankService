@@ -10,12 +10,12 @@ namespace BankService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountsController : ControllerBase
+    public class AccountController : ControllerBase
     {
         private readonly BankingContext _context;
-        private ILogger<AccountsController> _logger;
+        private ILogger<AccountController> _logger;
 
-        public AccountsController(BankingContext context, ILogger<AccountsController> logger)
+        public AccountController(BankingContext context, ILogger<AccountController> logger)
         {
             _context = context;
             _logger = logger;

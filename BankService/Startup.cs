@@ -28,19 +28,7 @@ namespace BankService
                 c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
             });
 
-            SetupLogging(services);
             SetupDatabase(services);
-        }
-
-        private void SetupLogging(IServiceCollection services)
-        {
-
-        }
-
-        private void SetupDatabase(IServiceCollection services)
-        {
-            services.AddDbContext<BankingContext>
-                (options => options.UseSqlServer(Configuration.GetConnectionString("BankingDatabase")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,6 +64,11 @@ namespace BankService
             {
                 scope.ServiceProvider.GetRequiredService<BankingContext>().Database.Migrate();
             }
+        }
+        private void SetupDatabase(IServiceCollection services)
+        {
+            services.AddDbContext<BankingContext>
+                (options => options.UseSqlServer(Configuration.GetConnectionString("BankingDatabase")));
         }
     }
 }

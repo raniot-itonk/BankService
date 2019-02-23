@@ -27,7 +27,6 @@ namespace BankService
             {
                 Log.CloseAndFlush();
             }
-
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
