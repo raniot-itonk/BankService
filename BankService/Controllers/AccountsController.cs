@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BankService.DB;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 
 namespace BankService.Controllers
@@ -23,6 +24,7 @@ namespace BankService.Controllers
 
         // GET: api/Accounts
         [HttpGet]
+        [Authorize("BankingService.UserActions")]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
             _logger.LogInformation("Getting accounts!");
