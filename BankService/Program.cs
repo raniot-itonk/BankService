@@ -3,9 +3,6 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Serilog;
-using Serilog.Formatting.Json;
-using Serilog.Sinks.Elasticsearch;
-using Serilog.Sinks.File;
 
 namespace BankService
 {
@@ -43,17 +40,6 @@ namespace BankService
             Log.Logger = new LoggerConfiguration()
                 .Enrich.WithProperty("Environment", env)
                 .ReadFrom.Configuration(configuration)
-                //.WriteTo.Console()
-                //.WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri("http://192.168.250.135:30330/"))
-                //{
-                //    FailureCallback = e => Log.Information("Unable to submit event " + e.MessageTemplate),
-                //    EmitEventFailure = EmitEventFailureHandling.WriteToSelfLog |
-                //                       EmitEventFailureHandling.WriteToFailureSink |
-                //                       EmitEventFailureHandling.RaiseCallback,
-                //    FailureSink = new LoggerConfiguration().WriteTo
-                //        .File(new JsonFormatter(), "./fails.txt").CreateLogger()
-                //})
-
                 .CreateLogger();
             Log.Information("Logger setup");
         }
