@@ -21,8 +21,8 @@ namespace BankService.Controllers
             _logger = logger;
         }
 
-        [HttpPut]
-        public async Task<IActionResult> PutReservation(ReservationObject reservationObject)
+        [HttpPost]
+        public async Task<IActionResult> PostReservation(ReservationObject reservationObject)
         {
             try
             {
@@ -44,5 +44,26 @@ namespace BankService.Controllers
             }
 
         }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteReservation(Guid id)
+        {
+            try
+            {
+                var reservation = await _context.Reservations.Include(r => r.OwnerAccount).FirstAsync(r => r.Id == id);
+                reservation.OwnerAccount.Balance += reservation.Amount;
+                _context.Reservations.Remove(reservation);
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Successfully Removed reservation and transferred {Amount} back to {Owner}", reservation.Amount, reservation.OwnerAccount);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to Remove Reservation");
+                throw;
+            }
+
+            return Ok();
+        }
+
     }
 }

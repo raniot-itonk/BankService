@@ -36,11 +36,6 @@ namespace BankService.Controllers
                 reservation.Amount = reservation.Amount - transferObject.Amount;
                 toAccount.Balance = toAccount.Balance + transferObject.Amount;
                 _context.Transfers.Add(new Transfer { Amount = transferObject.Amount, From = fromAccount, To = toAccount });
-                if (transferObject.ReleaseReservation)
-                {
-                    fromAccount.Balance += reservation.Amount;
-                    _context.Reservations.Remove(reservation);
-                }
 
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Successfully transferred {Amount} from {Sender} to {Receiver}", transferObject.Amount, fromAccount, toAccount);

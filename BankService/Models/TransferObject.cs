@@ -10,8 +10,6 @@ namespace BankService.Models
         [Required]
         public Guid ReservationId { get; set; }
         [Required]
-        public bool ReleaseReservation { get; set; }
-        [Required]
         public string ToAccountId { get; set; }
         [Required]
         [RegularExpression(@"^\d+\.?\d{0,2}$", ErrorMessage = "Please only use two decimals")]
