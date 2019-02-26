@@ -56,22 +56,22 @@ namespace BankService.IntegrationTests
             Assert.Equal(5, senderAfterTransfer.Balance);
         }
 
-        private async Task MakeTransferHelper(string senderId, string receiverId, Guid reservationId)
+        private async Task MakeTransferHelper(Guid senderId, Guid receiverId, Guid reservationId)
         {
-            var transferObject = new TransferObject() { FromAccountId = senderId, ToAccountId = receiverId, Amount = 5.00, ReservationId = reservationId, ReleaseReservation = true };
+            var transferObject = new TransferObject() { FromAccountId = senderId, ToAccountId = receiverId, Amount = 5.00, ReservationId = reservationId};
             var transferContent = new StringContent(JsonConvert.SerializeObject(transferObject), Encoding.UTF8, "application/json");
             var httpResponse = await _client.PutAsync("/api/transfer", transferContent);
             httpResponse.EnsureSuccessStatusCode();
         }
 
-        private async Task<Account> GetSingleAccountHelper(string id)
+        private async Task<Account> GetSingleAccountHelper(Guid id)
         {
             var httpResponse = await _client.GetAsync($"/api/Account/{id}");
             httpResponse.EnsureSuccessStatusCode();
             return await httpResponse.Content.ReadAsAsync<Account>(new[] { new JsonMediaTypeFormatter() });
         }
 
-        private async Task<Guid> MakeReservationHelper(string id)
+        private async Task<Guid> MakeReservationHelper(Guid id)
         {
             var reservation = new ReservationObject { AccountId = id, Amount = 5 };
             var reservationContent = new StringContent(JsonConvert.SerializeObject(reservation), Encoding.UTF8, "application/json");
@@ -81,10 +81,10 @@ namespace BankService.IntegrationTests
             return reservationId;
         }
 
-        private async Task<string> CreateAccountHelper()
+        private async Task<Guid> CreateAccountHelper()
         {
-            var id = Guid.NewGuid().ToString();
-            var account = new Account { OwnerId = id, Balance = 10, OwnerName = id };
+            var id = Guid.NewGuid();
+            var account = new Account { OwnerId = id, Balance = 10, OwnerName = id.ToString() };
             var content = new StringContent(JsonConvert.SerializeObject(account), Encoding.UTF8, "application/json");
             var httpResponse = await _client.PostAsync("/api/Account", content);
             httpResponse.EnsureSuccessStatusCode();

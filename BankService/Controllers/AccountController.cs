@@ -41,7 +41,7 @@ namespace BankService.Controllers
         // Deposit money
         //[Authorize("BankingService.UserActions")]
         [HttpPut("{id}/deposit/{amount}")]
-        public async Task<IActionResult> PutAccount(string id, double amount)
+        public async Task<IActionResult> PutAccount(Guid id, double amount)
         {
             try
             {

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankService.Migrations
 {
     [DbContext(typeof(BankingContext))]
-    [Migration("20190223142545_AccountTransferAndReservation")]
+    [Migration("20190226204335_AccountTransferAndReservation")]
     partial class AccountTransferAndReservation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,7 +23,7 @@ namespace BankService.Migrations
 
             modelBuilder.Entity("BankService.DB.Account", b =>
                 {
-                    b.Property<string>("OwnerId")
+                    b.Property<Guid>("OwnerId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<double>("Balance");
@@ -43,7 +43,7 @@ namespace BankService.Migrations
 
                     b.Property<double>("Amount");
 
-                    b.Property<string>("OwnerAccountOwnerId");
+                    b.Property<Guid?>("OwnerAccountOwnerId");
 
                     b.HasKey("Id");
 
@@ -60,9 +60,9 @@ namespace BankService.Migrations
 
                     b.Property<double>("Amount");
 
-                    b.Property<string>("FromOwnerId");
+                    b.Property<Guid?>("FromOwnerId");
 
-                    b.Property<string>("ToOwnerId");
+                    b.Property<Guid?>("ToOwnerId");
 
                     b.HasKey("Id");
 

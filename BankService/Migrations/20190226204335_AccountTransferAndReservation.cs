@@ -12,7 +12,7 @@ namespace BankService.Migrations
                 name: "Accounts",
                 columns: table => new
                 {
-                    OwnerId = table.Column<string>(nullable: false),
+                    OwnerId = table.Column<Guid>(nullable: false),
                     OwnerName = table.Column<string>(maxLength: 100, nullable: true),
                     Balance = table.Column<double>(nullable: false)
                 },
@@ -26,7 +26,7 @@ namespace BankService.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    OwnerAccountOwnerId = table.Column<string>(nullable: true),
+                    OwnerAccountOwnerId = table.Column<Guid>(nullable: true),
                     Amount = table.Column<double>(nullable: false)
                 },
                 constraints: table =>
@@ -46,8 +46,8 @@ namespace BankService.Migrations
                 {
                     Id = table.Column<long>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    FromOwnerId = table.Column<string>(nullable: true),
-                    ToOwnerId = table.Column<string>(nullable: true),
+                    FromOwnerId = table.Column<Guid>(nullable: true),
+                    ToOwnerId = table.Column<Guid>(nullable: true),
                     Amount = table.Column<double>(nullable: false)
                 },
                 constraints: table =>

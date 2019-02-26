@@ -22,7 +22,7 @@ namespace BankService.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostReservation(ReservationObject reservationObject)
+        public async Task<ActionResult<Reservation>> PostReservation(ReservationObject reservationObject)
         {
             try
             {

@@ -21,7 +21,7 @@ namespace BankService.Migrations
 
             modelBuilder.Entity("BankService.DB.Account", b =>
                 {
-                    b.Property<string>("OwnerId")
+                    b.Property<Guid>("OwnerId")
                         .ValueGeneratedOnAdd();
 
                     b.Property<double>("Balance");
@@ -41,7 +41,7 @@ namespace BankService.Migrations
 
                     b.Property<double>("Amount");
 
-                    b.Property<string>("OwnerAccountOwnerId");
+                    b.Property<Guid?>("OwnerAccountOwnerId");
 
                     b.HasKey("Id");
 
@@ -58,9 +58,9 @@ namespace BankService.Migrations
 
                     b.Property<double>("Amount");
 
-                    b.Property<string>("FromOwnerId");
+                    b.Property<Guid?>("FromOwnerId");
 
-                    b.Property<string>("ToOwnerId");
+                    b.Property<Guid?>("ToOwnerId");
 
                     b.HasKey("Id");
 
