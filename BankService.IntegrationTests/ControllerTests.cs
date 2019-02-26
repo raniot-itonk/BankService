@@ -75,7 +75,7 @@ namespace BankService.IntegrationTests
         {
             var reservation = new ReservationObject { AccountId = id, Amount = 5 };
             var reservationContent = new StringContent(JsonConvert.SerializeObject(reservation), Encoding.UTF8, "application/json");
-            var httpResponse = await _client.PutAsync("/api/Reservation", reservationContent);
+            var httpResponse = await _client.PostAsync("/api/Reservation", reservationContent);
             httpResponse.EnsureSuccessStatusCode();
             var reservationId = await httpResponse.Content.ReadAsAsync<Guid>(new[] {new JsonMediaTypeFormatter()});
             return reservationId;

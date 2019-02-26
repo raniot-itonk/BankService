@@ -65,7 +65,7 @@ namespace BankService
                 app.UseHsts();
             }
 
-            InitializeDatabase(app);
+            InitializeDatabase(app, env);
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
             app.UseSwagger();
@@ -79,11 +79,14 @@ namespace BankService
             app.UseMvc();
         }
 
-        private static void InitializeDatabase(IApplicationBuilder app)
+        private static void InitializeDatabase(IApplicationBuilder app, IHostingEnvironment env)
         {
             using (var scope = app.ApplicationServices.GetService<IServiceScopeFactory>().CreateScope())
             {
-                scope.ServiceProvider.GetRequiredService<BankingContext>().Database.Migrate();
+                if (env.IsDevelopment())
+                    scope.ServiceProvider.GetRequiredService<BankingContext>().Database.EnsureCreated();
+                else
+                    scope.ServiceProvider.GetRequiredService<BankingContext>().Database.Migrate();
             }
         }
         private void SetupDatabase(IServiceCollection services)

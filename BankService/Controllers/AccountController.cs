@@ -25,7 +25,7 @@ namespace BankService.Controllers
         // Get Account information
         //[Authorize("BankingService.UserActions")]
         [HttpGet("{id}")]
-        public async Task<ActionResult<Account>> GetAccount(string id)
+        public async Task<ActionResult<Account>> GetAccount(Guid id)
         {
             
             var account = await _context.Accounts.FindAsync(id);
