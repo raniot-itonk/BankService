@@ -23,7 +23,7 @@ namespace BankService.Controllers
         }
 
         // Get Account information
-        //[Authorize("BankingService.UserActions")]
+        [Authorize("BankingService.UserActions")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(Guid id)
         {
@@ -40,8 +40,8 @@ namespace BankService.Controllers
 
         // Deposit money
         //[Authorize("BankingService.UserActions")]
-        [HttpPut("{id}/deposit/{amount}")]
-        public async Task<IActionResult> PutAccount(Guid id, double amount)
+        [HttpPut("{id}/balance")]
+        public async Task<IActionResult> PutAccount(Guid id, [FromBody]double amount)
         {
             try
             {
