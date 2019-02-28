@@ -2,21 +2,26 @@
 using BankService.DB;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace BankService
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly IHostingEnvironment _env;
+        public Startup(IConfiguration configuration, IHostingEnvironment env)
         {
             Configuration = configuration;
+            _env = env;
         }
 
         public IConfiguration Configuration { get; }
@@ -24,37 +29,40 @@ namespace BankService
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            // Disables auth when in Development
+            if (_env.IsDevelopment()) 
+                services.AddMvc(opts =>{opts.Filters.Add(new AllowAnonymousFilter());})
+                    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            else
+                services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "My API", Version = "v1" });
+                c.SwaggerDoc("v1", new Info {Title = "My API", Version = "v1"});
+
+                // Disable Swagger auth when in Development
+                if (_env.IsDevelopment()) return;
+                c.AddSecurityDefinition("oauth2", new ApiKeyScheme
+                {
+                    Description =
+                        "Standard Authorization header using the Bearer scheme. Example: \"bearer {token}\"",
+                    In = "header",
+                    Name = "Authorization",
+                    Type = "apiKey"
+                });
+                c.OperationFilter<SecurityRequirementsOperationFilter>();
             });
 
             SetupDatabase(services);
-
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                .AddJwtBearer(options =>
-                {
-                    options.Authority = Configuration["IdentityServerBaseAddress"];
-                    options.Audience = "BankingService";
-                });
-
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("BankingService.UserActions", policy =>
-                    policy.Requirements.Add(new HasScopeRequirement("BankingService.UserActions", Configuration["IdentityServerBaseAddress"])));
-                options.AddPolicy("BankingService.broker&taxer", policy =>
-                    policy.Requirements.Add(new HasScopeRequirement("BankingService.broker&taxer", Configuration["IdentityServerBaseAddress"])));
-            });
-
-            services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
+            AddAuthenticationAndAuthorization(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             app.UseAuthentication();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -93,6 +101,26 @@ namespace BankService
         {
             services.AddDbContext<BankingContext>
                 (options => options.UseSqlServer(Configuration.GetConnectionString("BankingDatabase")));
+        }
+
+        private void AddAuthenticationAndAuthorization(IServiceCollection services)
+        {
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.Authority = Configuration["IdentityServerBaseAddress"];
+                    options.Audience = "BankingService";
+                });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("BankingService.UserActions", policy =>
+                    policy.Requirements.Add(new HasScopeRequirement("BankingService.UserActions", Configuration["IdentityServerBaseAddress"])));
+                options.AddPolicy("BankingService.broker&taxer", policy =>
+                    policy.Requirements.Add(new HasScopeRequirement("BankingService.broker&taxer", Configuration["IdentityServerBaseAddress"])));
+            });
+            services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
+            
         }
     }
 }

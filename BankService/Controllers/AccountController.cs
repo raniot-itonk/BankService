@@ -3,8 +3,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BankService.DB;
+using BankService.Helpers;
 using BankService.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace BankService.Controllers
@@ -15,11 +17,14 @@ namespace BankService.Controllers
     {
         private readonly BankingContext _context;
         private readonly ILogger<AccountController> _logger;
+        private readonly IHostingEnvironment _env;
 
-        public AccountController(BankingContext context, ILogger<AccountController> logger)
+        public AccountController(BankingContext context, ILogger<AccountController> logger,
+            IHostingEnvironment env)
         {
             _context = context;
             _logger = logger;
+            _env = env;
         }
 
         // Get Account information
@@ -27,7 +32,9 @@ namespace BankService.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(Guid id)
         {
-            
+            if (!RequestHelper.ValidateId(id, Request, _env))
+                return BadRequest("HeaderId and Id are not equal");
+
             var account = await _context.Accounts.FindAsync(id);
 
             if (account == null)
@@ -38,13 +45,17 @@ namespace BankService.Controllers
             return account;
         }
 
+
+
         // Deposit money
-        //[Authorize("BankingService.UserActions")]
+        [Authorize("BankingService.UserActions")]
         [HttpPut("{id}/balance")]
         public async Task<IActionResult> PutAccount(Guid id, [FromBody]double amount)
         {
             try
             {
+                if (!RequestHelper.ValidateId(id, Request, _env))
+                    return BadRequest("HeaderId and Id are not equal");
                 var account = await _context.Accounts.FirstOrDefaultAsync(x => x.OwnerId == id);
                 account.Balance += amount;
 
@@ -65,6 +76,8 @@ namespace BankService.Controllers
         [HttpPost]
         public async Task<ActionResult<Account>> PostAccount(AccountObject accountObject)
         {
+            if (!RequestHelper.ValidateId(accountObject.OwnerId, Request, _env))
+                return BadRequest("HeaderId and Id are not equal");
             try
             {
                 var account = new Account
@@ -84,5 +97,7 @@ namespace BankService.Controllers
                 throw;
             }
         }
+
+
     }
 }
