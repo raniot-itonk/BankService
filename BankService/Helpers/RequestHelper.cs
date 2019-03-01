@@ -15,7 +15,7 @@ namespace BankService.Helpers
             var jwtSecurityTokenHandler = new JwtSecurityTokenHandler();
             try
             {
-                var jwtSecurityToken = jwtSecurityTokenHandler.ReadJwtToken(keyValuePair.Value.ToString().Replace("bearer ", ""));
+                var jwtSecurityToken = jwtSecurityTokenHandler.ReadJwtToken(keyValuePair.Value.ToString().Replace("bearer ", "").Replace("Bearer ", ""));
                 var idFromJwt = Guid.Parse(jwtSecurityToken.Subject);
                 return idFromJwt;
             }
@@ -35,7 +35,7 @@ namespace BankService.Helpers
         /// <returns></returns>
         public static bool ValidateId(Guid id, HttpRequest request, IHostingEnvironment env)
         {
-            return env.IsDevelopment() || id.Equals(GetJwtFromHeader(request));
+            return id.Equals(GetJwtFromHeader(request));
         }
     }
 }

@@ -15,10 +15,10 @@ namespace BankService.Controllers
     public class ReservationController : ControllerBase
     {
         private readonly BankingContext _context;
-        private readonly ILogger<AccountController> _logger;
+        private readonly ILogger<ReservationController> _logger;
         private readonly IHostingEnvironment _env;
 
-        public ReservationController(BankingContext context, ILogger<AccountController> logger,
+        public ReservationController(BankingContext context, ILogger<ReservationController> logger,
             IHostingEnvironment env)
         {
             _context = context;

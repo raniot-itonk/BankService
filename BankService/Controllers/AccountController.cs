@@ -13,7 +13,7 @@ namespace BankService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public partial class AccountController : ControllerBase
     {
         private readonly BankingContext _context;
         private readonly ILogger<AccountController> _logger;
@@ -50,18 +50,18 @@ namespace BankService.Controllers
         // Deposit money
         [Authorize("BankingService.UserActions")]
         [HttpPut("{id}/balance")]
-        public async Task<IActionResult> PutAccount(Guid id, [FromBody]double amount)
+        public async Task<IActionResult> PutAccount(Guid id, [FromBody]DepositRequest depositRequest)
         {
             try
             {
                 if (!RequestHelper.ValidateId(id, Request, _env))
                     return BadRequest("HeaderId and Id are not equal");
                 var account = await _context.Accounts.FirstOrDefaultAsync(x => x.OwnerId == id);
-                account.Balance += amount;
+                account.Balance += depositRequest.Amount;
 
                 _context.Entry(account).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Successfully deposited {Amount} to {Account}", amount, account);
+                _logger.LogInformation("Successfully deposited {Amount} to {Account}", depositRequest.Amount, account);
             }
             catch (Exception e)
             {

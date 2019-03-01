@@ -13,9 +13,9 @@ namespace BankService.Controllers
     public class TransferController : ControllerBase
     {
         private readonly BankingContext _context;
-        private readonly ILogger<AccountController> _logger;
+        private readonly ILogger<TransferController> _logger;
 
-        public TransferController(BankingContext context, ILogger<AccountController> logger)
+        public TransferController(BankingContext context, ILogger<TransferController> logger)
         {
             _context = context;
             _logger = logger;
