@@ -1,5 +1,6 @@
 ﻿using BankService.Authorization;
 using BankService.DB;
+using BankService.OptionModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
@@ -10,6 +11,7 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Swagger;
 
@@ -35,7 +37,11 @@ namespace BankService
                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             else
                 services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+
+            services.Configure<Services>(Configuration.GetSection(nameof(Services)));
             
+
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
             {
@@ -55,7 +61,9 @@ namespace BankService
             });
 
             SetupDatabase(services);
-            AddAuthenticationAndAuthorization(services);
+            var authorizationService = services.BuildServiceProvider().GetService<IOptionsMonitor<Services>>()
+                .CurrentValue.AuthorizationService;
+            AddAuthenticationAndAuthorization(services, authorizationService);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -103,12 +111,13 @@ namespace BankService
                 (options => options.UseSqlServer(Configuration.GetConnectionString("BankingDatabase")));
         }
 
-        private void AddAuthenticationAndAuthorization(IServiceCollection services)
+        private void AddAuthenticationAndAuthorization(IServiceCollection services,
+            AuthorizationService authorizationService)
         {
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
-                    options.Authority = Configuration["IdentityServerBaseAddress"];
+                    options.Authority = authorizationService.BaseAddress;
                     options.Audience = "BankingService";
                 });
 
