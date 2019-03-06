@@ -32,10 +32,10 @@ namespace BankService
         public void ConfigureServices(IServiceCollection services)
         {
             // Disables auth when in Development
-            if (_env.IsDevelopment()) 
-                services.AddMvc(opts =>{opts.Filters.Add(new AllowAnonymousFilter());})
-                    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-            else
+            //if (_env.IsDevelopment()) 
+            //    services.AddMvc(opts =>{opts.Filters.Add(new AllowAnonymousFilter());})
+            //        .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            //else
                 services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
 
@@ -48,7 +48,7 @@ namespace BankService
                 c.SwaggerDoc("v1", new Info {Title = "My API", Version = "v1"});
 
                 // Disable Swagger auth when in Development
-                if (_env.IsDevelopment()) return;
+                //if (_env.IsDevelopment()) return;
                 c.AddSecurityDefinition("oauth2", new ApiKeyScheme
                 {
                     Description =
@@ -124,9 +124,9 @@ namespace BankService
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("BankingService.UserActions", policy =>
-                    policy.Requirements.Add(new HasScopeRequirement("BankingService.UserActions", Configuration["IdentityServerBaseAddress"])));
+                    policy.Requirements.Add(new HasScopeRequirement("BankingService.UserActions", authorizationService.BaseAddress)));
                 options.AddPolicy("BankingService.broker&taxer", policy =>
-                    policy.Requirements.Add(new HasScopeRequirement("BankingService.broker&taxer", Configuration["IdentityServerBaseAddress"])));
+                    policy.Requirements.Add(new HasScopeRequirement("BankingService.broker&taxer", authorizationService.BaseAddress)));
             });
             services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
             
