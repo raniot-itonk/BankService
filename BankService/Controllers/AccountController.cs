@@ -41,7 +41,7 @@ namespace BankService.Controllers
             {
                 return NotFound();
             }
-            _logger.LogInformation("Got {Account}", account);
+            _logger.LogInformation("Got {@Account}", account);
             return account;
         }
 
