@@ -34,14 +34,14 @@ namespace BankService.Controllers
             try
             {
                 var account = await _context.Accounts.FirstOrDefaultAsync(x => x.OwnerId == reservationObject.AccountId);
-                if (account == null) return BadRequest("AccountId does not exist");
+                if (account == null) return BadRequest($"AccountId {reservationObject.AccountId} does not exist");
 
                 account.Balance = account.Balance - reservationObject.Amount;
                 var reservation = new Reservation { Amount = reservationObject.Amount, OwnerAccount = account };
                 _context.Reservations.Add(reservation);
 
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Successfully reserved {Amount} from {Account}", reservationObject.Amount, account);
+                _logger.LogInformation("Successfully reserved {Amount} from {@Account}", reservationObject.Amount, account);
                 return Ok(reservation.Id);
             }
             catch (Exception e)
@@ -63,7 +63,7 @@ namespace BankService.Controllers
                 reservation.OwnerAccount.Balance += reservation.Amount;
                 _context.Reservations.Remove(reservation);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Successfully Removed reservation and transferred {Amount} back to {Owner}", reservation.Amount, reservation.OwnerAccount);
+                _logger.LogInformation("Successfully Removed reservation and transferred {Amount} back to {@Owner}", reservation.Amount, reservation.OwnerAccount);
             }
             catch (Exception e)
             {

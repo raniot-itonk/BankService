@@ -61,7 +61,7 @@ namespace BankService.Controllers
 
                 _context.Entry(account).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Successfully deposited {Amount} to {Account}", depositRequest.Amount, account);
+                _logger.LogInformation("Successfully deposited {Amount} to {@Account}", depositRequest.Amount, account);
             }
             catch (Exception e)
             {
@@ -88,7 +88,7 @@ namespace BankService.Controllers
                 };
                 _context.Accounts.Add(account);
                 await _context.SaveChangesAsync();
-                _logger.LogInformation("Successfully created {Account}", account);
+                _logger.LogInformation("Successfully created {@Account}", account);
                 return CreatedAtAction("GetAccount", new { id = account.OwnerId }, account);
             }
             catch (Exception e)
