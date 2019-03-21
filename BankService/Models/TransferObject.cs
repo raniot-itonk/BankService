@@ -12,7 +12,7 @@ namespace BankService.Models
         [Required]
         public Guid ToAccountId { get; set; }
         [Required]
-        [RegularExpression(@"^\d+\.?\d{0,2}$", ErrorMessage = "Please only use two decimals")]
+        //[RegularExpression(@"^\d+\.?\d{0,2}$", ErrorMessage = "Please only use two decimals")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Please enter a value greater than {1}")]
         public double Amount { get; set; }
     }

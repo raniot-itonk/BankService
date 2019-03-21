@@ -33,8 +33,8 @@ namespace BankService.Controllers
                 var reservation = await _context.Reservations.FirstOrDefaultAsync(r => r.OwnerAccount == fromAccount && r.Id == transferObject.ReservationId);
                 if (reservation == null) return BadRequest($"Reservation {transferObject.ReservationId} does not exist");
 
-                reservation.Amount = reservation.Amount - transferObject.Amount;
-                toAccount.Balance = toAccount.Balance + transferObject.Amount;
+                reservation.Amount -= transferObject.Amount;
+                toAccount.Balance += transferObject.Amount;
                 _context.Transfers.Add(new Transfer { Amount = transferObject.Amount, From = fromAccount, To = toAccount });
 
                 await _context.SaveChangesAsync();
