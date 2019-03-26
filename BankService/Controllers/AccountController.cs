@@ -13,7 +13,7 @@ namespace BankService.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public partial class AccountController : ControllerBase
+    public class AccountController : ControllerBase
     {
         private readonly BankingContext _context;
         private readonly ILogger<AccountController> _logger;
