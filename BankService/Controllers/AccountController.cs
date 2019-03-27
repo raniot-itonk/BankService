@@ -28,7 +28,7 @@ namespace BankService.Controllers
         }
 
         // Get Account information
-        [Authorize("BankingService.UserActions")]
+        //[Authorize("BankingService.UserActions")]
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(Guid id)
         {
@@ -48,7 +48,7 @@ namespace BankService.Controllers
 
 
         // Deposit money
-        [Authorize("BankingService.UserActions")]
+        //[Authorize("BankingService.UserActions")]
         [HttpPut("{id}/balance")]
         public async Task<IActionResult> PutAccount(Guid id, [FromBody]DepositRequest depositRequest)
         {
