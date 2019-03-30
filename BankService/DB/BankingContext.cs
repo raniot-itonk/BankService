@@ -14,6 +14,12 @@ namespace BankService.DB
         public DbSet<Account> Accounts { get; set; }
         public DbSet<Transfer> Transfers { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.Seed();
+        }
     }
 
     public class Transfer
