@@ -55,8 +55,6 @@ namespace BankService.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteReservation(Guid id)
         {
-            if (!RequestHelper.ValidateId(id, Request, _env))
-                return BadRequest("HeaderId and Id are not equal");
             try
             {
                 var reservation = await _context.Reservations.Include(r => r.OwnerAccount).FirstAsync(r => r.Id == id);
