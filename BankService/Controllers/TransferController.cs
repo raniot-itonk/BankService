@@ -22,16 +22,28 @@ namespace BankService.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> PutTransfer(TransferObject transferObject)
+        public async Task<ActionResult<ValidationResult>> PutTransfer(TransferObject transferObject)
         {
             try
             {
                 var fromAccount = await _context.Accounts.FirstOrDefaultAsync(x => x.OwnerId == transferObject.FromAccountId);
-                if (fromAccount == null) return BadRequest($"FromAccountId {transferObject.FromAccountId} does not exist");
+                if (fromAccount == null)
+                {
+                    _logger.LogWarning($"FromAccountId {transferObject.FromAccountId} does not exist");
+                    return new ValidationResult { Valid = false, ErrorMessage = $"FromAccountId {transferObject.FromAccountId} does not exist"};
+                }
                 var toAccount = await _context.Accounts.FirstOrDefaultAsync(x => x.OwnerId == transferObject.ToAccountId);
-                if (toAccount == null) return BadRequest($"ToAccountId {transferObject.ToAccountId} does not exist");
+                if (toAccount == null)
+                {
+                    _logger.LogWarning($"ToAccountId {transferObject.ToAccountId} does not exist");
+                    return new ValidationResult { Valid = false, ErrorMessage = $"ToAccountId {transferObject.ToAccountId} does not exist"};
+                }
                 var reservation = await _context.Reservations.FirstOrDefaultAsync(r => r.OwnerAccount == fromAccount && r.Id == transferObject.ReservationId);
-                if (reservation == null) return BadRequest($"Reservation {transferObject.ReservationId} does not exist");
+                if (reservation == null)
+                {
+                    _logger.LogWarning($"Reservation {transferObject.ReservationId} does not exist");
+                    return new ValidationResult { Valid = false, ErrorMessage = $"Reservation {transferObject.ReservationId} does not exist"};
+                }
 
                 reservation.Amount -= transferObject.Amount;
                 toAccount.Balance += transferObject.Amount;
@@ -46,7 +58,7 @@ namespace BankService.Controllers
                 throw;
             }
 
-            return Ok();
+            return new ValidationResult{Valid = true, ErrorMessage = ""};
         }
     }
 }
