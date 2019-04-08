@@ -27,14 +27,23 @@ namespace BankService.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Reservation>> PostReservation(ReservationObject reservationObject)
+        public async Task<ActionResult<ReservationResult>> PostReservation(ReservationObject reservationObject)
         {
             if (!RequestHelper.ValidateId(reservationObject.AccountId, Request, _env))
                 return BadRequest("HeaderId and Id are not equal");
             try
             {
                 var account = await _context.Accounts.FirstOrDefaultAsync(x => x.OwnerId == reservationObject.AccountId);
-                if (account == null) return BadRequest($"AccountId {reservationObject.AccountId} does not exist");
+                if (account == null)
+                {
+                    _logger.LogWarning(@"AccountId {AccountId} does not exist", reservationObject.AccountId);
+                    return new ReservationResult { Valid = false, ErrorMessage = $"AccountId {reservationObject.AccountId} does not exist" };
+                }
+                if (account.Balance < reservationObject.Amount)
+                {
+                    _logger.LogInformation("The account {AccountId} only got a balance of {balance}, but the request is for {Amount}", reservationObject.AccountId, account.Balance, reservationObject.Amount);
+                    return new ReservationResult { Valid = false, ErrorMessage = "The balance is {balance}, but the request is for {Amount}" };
+                }
 
                 account.Balance = account.Balance - reservationObject.Amount;
                 var reservation = new Reservation { Amount = reservationObject.Amount, OwnerAccount = account };
@@ -42,7 +51,7 @@ namespace BankService.Controllers
 
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Successfully reserved {Amount} from {@Account}", reservationObject.Amount, account);
-                return Ok(reservation.Id);
+                return new ReservationResult{Valid = true, ReservationId = reservation.Id, ErrorMessage = string.Empty};
             }
             catch (Exception e)
             {
