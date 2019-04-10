@@ -42,7 +42,7 @@ namespace BankService.Controllers
                 if (account.Balance < reservationObject.Amount)
                 {
                     _logger.LogInformation("The account {AccountId} only got a balance of {balance}, but the request is for {Amount}", reservationObject.AccountId, account.Balance, reservationObject.Amount);
-                    return new ReservationResult { Valid = false, ErrorMessage = "The balance is {balance}, but the request is for {Amount}" };
+                    return new ReservationResult { Valid = false, ErrorMessage = $"The balance is {account.Balance}, but the request is for {reservationObject.Amount}" };
                 }
 
                 account.Balance = account.Balance - reservationObject.Amount;
