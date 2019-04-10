@@ -5,12 +5,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Filters;
 using Swashbuckle.AspNetCore.Swagger;
@@ -64,6 +66,8 @@ namespace BankService
             var authorizationService = services.BuildServiceProvider().GetService<IOptionsMonitor<Services>>()
                 .CurrentValue.AuthorizationService;
             AddAuthenticationAndAuthorization(services, authorizationService);
+
+            services.AddHealthChecks().AddDbContextCheck<BankingContext>(tags: new[] {"ready"});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -81,6 +85,7 @@ namespace BankService
                 app.UseHsts();
             }
 
+            SetupReadyAndLiveHealthChecks(app);
             InitializeDatabase(app, env);
 
             // Enable middleware to serve generated Swagger as a JSON endpoint.
@@ -93,6 +98,20 @@ namespace BankService
 
             app.UseHttpsRedirection();
             app.UseMvc();
+        }
+
+        private static void SetupReadyAndLiveHealthChecks(IApplicationBuilder app)
+        {
+            // The readiness check uses all registered checks with the 'ready' tag.
+            app.UseHealthChecks("/health/ready", new HealthCheckOptions()
+            {
+                Predicate = (check) => check.Tags.Contains("ready"),
+            });
+            app.UseHealthChecks("/health/live", new HealthCheckOptions()
+            {
+                // Exclude all checks and return a 200-Ok.
+                Predicate = (_) => false
+            });
         }
 
         private static void InitializeDatabase(IApplicationBuilder app, IHostingEnvironment env)
