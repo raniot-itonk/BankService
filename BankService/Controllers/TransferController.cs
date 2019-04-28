@@ -5,6 +5,7 @@ using BankService.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 
 namespace BankService.Controllers
 {
@@ -14,6 +15,9 @@ namespace BankService.Controllers
     {
         private readonly BankingContext _context;
         private readonly ILogger<TransferController> _logger;
+
+        private static readonly Counter TotalTransfers = Metrics.CreateCounter("TotalTransfers", "Total amount of transfers");
+        private static readonly Counter TotalMoneyTransferred = Metrics.CreateCounter("TotalMoneyTransferred", "Total amount of money transferred");
 
         public TransferController(BankingContext context, ILogger<TransferController> logger)
         {
@@ -48,7 +52,8 @@ namespace BankService.Controllers
                 reservation.Amount -= transferObject.Amount;
                 toAccount.Balance += transferObject.Amount;
                 _context.Transfers.Add(new Transfer { Amount = transferObject.Amount, From = fromAccount, To = toAccount });
-
+                TotalTransfers.Inc();
+                TotalMoneyTransferred.Inc(transferObject.Amount);
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Successfully transferred {Amount} from {@Sender} to {@Receiver}", transferObject.Amount, fromAccount, toAccount);
             }

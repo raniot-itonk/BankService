@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Prometheus;
 
 namespace BankService.Controllers
 {
@@ -17,6 +18,8 @@ namespace BankService.Controllers
         private readonly BankingContext _context;
         private readonly ILogger<ReservationController> _logger;
         private readonly IHostingEnvironment _env;
+
+        private static readonly Counter TotalMoneyReserved = Metrics.CreateCounter("TotalMoneyReserved", "Total amount of money reserved");
 
         public ReservationController(BankingContext context, ILogger<ReservationController> logger,
             IHostingEnvironment env)
@@ -51,6 +54,7 @@ namespace BankService.Controllers
 
                 await _context.SaveChangesAsync();
                 _logger.LogInformation("Successfully reserved {Amount} from {@Account}", reservationObject.Amount, account);
+                TotalMoneyReserved.Inc(reservationObject.Amount);
                 return new ReservationResult{Valid = true, ReservationId = reservation.Id, ErrorMessage = string.Empty};
             }
             catch (Exception e)
@@ -58,7 +62,6 @@ namespace BankService.Controllers
                 _logger.LogError(e, "Failed to Reserve money");
                 throw;
             }
-
         }
 
         [HttpDelete("{id}")]

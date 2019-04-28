@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using BankService.DB;
 using BankService.Helpers;
 using BankService.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 
