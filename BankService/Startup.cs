@@ -1,5 +1,6 @@
 ﻿using BankService.Authorization;
 using BankService.DB;
+using BankService.HostedServices;
 using BankService.OptionModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -65,6 +66,7 @@ namespace BankService
                 .CurrentValue.AuthorizationService;
             AddAuthenticationAndAuthorization(services, authorizationService);
 
+            services.AddHostedService<RequestStatsService>();
             services.AddHealthChecks().AddDbContextCheck<BankingContext>(tags: new[] {"ready"});
         }
 
