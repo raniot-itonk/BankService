@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using BankService.Clients;
 using BankService.DB;
 using BankService.Helpers;
 using BankService.Models;
@@ -18,15 +19,17 @@ namespace BankService.Controllers
         private readonly BankingContext _context;
         private readonly ILogger<ReservationController> _logger;
         private readonly IHostingEnvironment _env;
+        private readonly IRabbitMqClient _rabbitMqClient;
 
         private static readonly Counter TotalMoneyReserved = Metrics.CreateCounter("TotalMoneyReserved", "Total amount of money reserved");
 
         public ReservationController(BankingContext context, ILogger<ReservationController> logger,
-            IHostingEnvironment env)
+            IHostingEnvironment env, IRabbitMqClient rabbitMqClient)
         {
             _context = context;
             _logger = logger;
             _env = env;
+            _rabbitMqClient = rabbitMqClient;
         }
 
         [HttpPost]
@@ -53,6 +56,7 @@ namespace BankService.Controllers
                 _context.Reservations.Add(reservation);
 
                 await _context.SaveChangesAsync();
+                _rabbitMqClient.SendMessage(new HistoryMessage { Event = "CreatedReservation", EventMessage = $"Reserved ${reservationObject.Amount} for buying shares with reservation id {reservationObject.AccountId}", User = reservationObject.AccountId, Timestamp = DateTime.UtcNow });
                 _logger.LogInformation("Successfully reserved {Amount} from {@Account}", reservationObject.Amount, account);
                 TotalMoneyReserved.Inc(reservationObject.Amount);
                 return new ReservationResult{Valid = true, ReservationId = reservation.Id, ErrorMessage = string.Empty};
@@ -73,6 +77,7 @@ namespace BankService.Controllers
                 reservation.OwnerAccount.Balance += reservation.Amount;
                 _context.Reservations.Remove(reservation);
                 await _context.SaveChangesAsync();
+                _rabbitMqClient.SendMessage(new HistoryMessage { Event = "DeleteReservation", EventMessage = $"Removed reservation with id ${id}", User = reservation.OwnerAccount.OwnerId, Timestamp = DateTime.UtcNow });
                 _logger.LogInformation("Successfully Removed reservation and transferred {Amount} back to {@Owner}", reservation.Amount, reservation.OwnerAccount);
             }
             catch (Exception e)

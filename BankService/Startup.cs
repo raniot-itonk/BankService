@@ -1,4 +1,5 @@
 ﻿using BankService.Authorization;
+using BankService.Clients;
 using BankService.DB;
 using BankService.HostedServices;
 using BankService.OptionModels;
@@ -41,7 +42,7 @@ namespace BankService
 
 
             services.Configure<Services>(Configuration.GetSection(nameof(Services)));
-            
+            services.Configure<RabbitMqOptions>(Configuration.GetSection(nameof(RabbitMqOptions)));
 
             // Register the Swagger generator, defining 1 or more Swagger documents
             services.AddSwaggerGen(c =>
@@ -68,6 +69,7 @@ namespace BankService
 
             services.AddHostedService<RequestStatsService>();
             services.AddHealthChecks().AddDbContextCheck<BankingContext>(tags: new[] {"ready"});
+            services.AddSingleton<IRabbitMqClient, RabbitMqClient>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

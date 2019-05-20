@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using BankService.Clients;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BankService.DB;
@@ -17,13 +18,15 @@ namespace BankService.Controllers
         private readonly BankingContext _context;
         private readonly ILogger<AccountController> _logger;
         private readonly IHostingEnvironment _env;
+        private readonly IRabbitMqClient _rabbitMqClient;
 
         public AccountController(BankingContext context, ILogger<AccountController> logger,
-            IHostingEnvironment env)
+            IHostingEnvironment env, IRabbitMqClient rabbitMqClient)
         {
             _context = context;
             _logger = logger;
             _env = env;
+            _rabbitMqClient = rabbitMqClient;
         }
 
         // Get Account information
@@ -60,6 +63,7 @@ namespace BankService.Controllers
 
                 _context.Entry(account).State = EntityState.Modified;
                 await _context.SaveChangesAsync();
+                _rabbitMqClient.SendMessage(new HistoryMessage { Event = "DepositedMoney", EventMessage = $"Deposited ${depositRequest.Amount} to own account", User = id, Timestamp = DateTime.UtcNow });
                 _logger.LogInformation("Successfully deposited {Amount} to {@Account}", depositRequest.Amount, account);
             }
             catch (Exception e)
@@ -87,6 +91,7 @@ namespace BankService.Controllers
                 };
                 _context.Accounts.Add(account);
                 await _context.SaveChangesAsync();
+                _rabbitMqClient.SendMessage(new HistoryMessage { Event = "CreatedBankAccount", EventMessage = $"Created bank account", User = accountObject.OwnerId, Timestamp = DateTime.UtcNow });
                 _logger.LogInformation("Successfully created {@Account}", account);
                 return CreatedAtAction("GetAccount", new { id = account.OwnerId }, account);
             }
