@@ -35,8 +35,8 @@ namespace BankService.Controllers
         [HttpPost]
         public async Task<ActionResult<ReservationResult>> PostReservation(ReservationObject reservationObject)
         {
-            if (!RequestHelper.ValidateId(reservationObject.AccountId, Request, _env))
-                return BadRequest("HeaderId and Id are not equal");
+            //if (!RequestHelper.ValidateId(reservationObject.AccountId, Request, _env))
+            //    return BadRequest("HeaderId and Id are not equal");
             try
             {
                 var account = await _context.Accounts.FirstOrDefaultAsync(x => x.OwnerId == reservationObject.AccountId);
