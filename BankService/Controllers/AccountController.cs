@@ -34,8 +34,8 @@ namespace BankService.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(Guid id)
         {
-            if (!RequestHelper.ValidateId(id, Request, _env))
-                return BadRequest("HeaderId and Id are not equal");
+            //if (!RequestHelper.ValidateId(id, Request, _env))
+            //    return BadRequest("HeaderId and Id are not equal");
 
             var account = await _context.Accounts.FindAsync(id);
 
@@ -56,8 +56,8 @@ namespace BankService.Controllers
         {
             try
             {
-                if (!RequestHelper.ValidateId(id, Request, _env))
-                    return BadRequest("HeaderId and Id are not equal");
+                //if (!RequestHelper.ValidateId(id, Request, _env))
+                //    return BadRequest("HeaderId and Id are not equal");
                 var account = await _context.Accounts.FirstOrDefaultAsync(x => x.OwnerId == id);
                 account.Balance += depositRequest.Amount;
 
@@ -79,8 +79,8 @@ namespace BankService.Controllers
         [HttpPost]
         public async Task<ActionResult<Account>> PostAccount(AccountObject accountObject)
         {
-            if (!RequestHelper.ValidateId(accountObject.OwnerId, Request, _env))
-                return BadRequest("HeaderId and Id are not equal");
+            //if (!RequestHelper.ValidateId(accountObject.OwnerId, Request, _env))
+            //    return BadRequest("HeaderId and Id are not equal");
             try
             {
                 var account = new Account
