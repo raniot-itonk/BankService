@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using BankService.DB;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Prometheus;
@@ -12,14 +13,14 @@ namespace BankService.HostedServices
     public class RequestStatsService : IHostedService, IDisposable
     {
         private readonly ILogger _logger;
-        private readonly BankingContext _context;
+        private readonly IServiceProvider _serviceProvider;
         private Timer _timer;
         private static readonly Gauge TotalSum = Metrics.CreateGauge("TotalSum", "Total balance of all accounts in the bank");
 
-        public RequestStatsService(ILogger<RequestStatsService> logger, BankingContext context)
+        public RequestStatsService(ILogger<RequestStatsService> logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
-            _context = context;
+            _serviceProvider = serviceProvider;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -33,9 +34,14 @@ namespace BankService.HostedServices
 
         private async void UpdateRequestStats(object state)
         {
-            var sum = await _context.Accounts.SumAsync(account => account.Balance);
-            _logger.LogInformation("Total sum of money in the bank {sum}", sum);
-            TotalSum.Set(sum);
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var bankingContext = scope.ServiceProvider
+                    .GetRequiredService<BankingContext>();
+                var sum = await bankingContext.Accounts.SumAsync(account => account.Balance);
+                _logger.LogInformation("Total sum of money in the bank {sum}", sum);
+                TotalSum.Set(sum);
+            }
         }
 
         public Task StopAsync(CancellationToken cancellationToken)

@@ -56,7 +56,7 @@ namespace BankService.Controllers
                 _context.Reservations.Add(reservation);
 
                 await _context.SaveChangesAsync();
-                _rabbitMqClient.SendMessage(new HistoryMessage { Event = "CreatedReservation", EventMessage = $"Reserved ${reservationObject.Amount} for buying shares with reservation id {reservationObject.AccountId}", User = reservationObject.AccountId, Timestamp = DateTime.UtcNow });
+                _rabbitMqClient.SendMessage(new HistoryMessage { Event = "CreatedReservation", EventMessage = $"Reserved ${reservationObject.Amount} for buying shares with reservation id {reservation.Id}", User = reservationObject.AccountId, Timestamp = DateTime.UtcNow });
                 _logger.LogInformation("Successfully reserved {Amount} from {@Account}", reservationObject.Amount, account);
                 TotalMoneyReserved.Inc(reservationObject.Amount);
                 return new ReservationResult{Valid = true, ReservationId = reservation.Id, ErrorMessage = string.Empty};
@@ -77,7 +77,7 @@ namespace BankService.Controllers
                 reservation.OwnerAccount.Balance += reservation.Amount;
                 _context.Reservations.Remove(reservation);
                 await _context.SaveChangesAsync();
-                _rabbitMqClient.SendMessage(new HistoryMessage { Event = "DeleteReservation", EventMessage = $"Removed reservation with id ${id}", User = reservation.OwnerAccount.OwnerId, Timestamp = DateTime.UtcNow });
+                _rabbitMqClient.SendMessage(new HistoryMessage { Event = "DeleteReservation", EventMessage = $"Removed reservation with id {id}", User = reservation.OwnerAccount.OwnerId, Timestamp = DateTime.UtcNow });
                 _logger.LogInformation("Successfully Removed reservation and transferred {Amount} back to {@Owner}", reservation.Amount, reservation.OwnerAccount);
             }
             catch (Exception e)
